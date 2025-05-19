@@ -1,0 +1,1374 @@
+openapi: 3.0.0
+info:
+  title: StartFlow API Documentation
+  version: 1.0.0
+  description: API documentation for StartFlow application
+servers:
+  - url: http://localhost:3000
+    description: Development server
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    User:
+      type: object
+      properties:
+        uid:
+          type: string
+        email:
+          type: string
+        firstName:
+          type: string
+        lastName:
+          type: string
+        phone:
+          type: string
+        role:
+          type: string
+        status:
+          type: string
+        businessDetails:
+          type: object
+        fundingDetails:
+          type: object
+        createdAt:
+          type: string
+    RegisterRequest:
+      type: object
+      required:
+        - email
+        - password
+        - firstName
+        - lastName
+        - phone
+        - role
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          minLength: 8
+        firstName:
+          type: string
+        lastName:
+          type: string
+        phone:
+          type: string
+        role:
+          type: string
+          enum: [user, businessOwner, fundingEntity, admin]
+        businessDetails:
+          type: object
+        fundingDetails:
+          type: object
+    LoginRequest:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+    UpdateProfileRequest:
+      type: object
+      properties:
+        firstName:
+          type: string
+        lastName:
+          type: string
+        phone:
+          type: string
+    UpdateStatusRequest:
+      type: object
+      required:
+        - status
+      properties:
+        status:
+          type: string
+          enum: [pending, approved, rejected]
+    FundingRequest:
+      type: object
+      properties:
+        id:
+          type: string
+        businessId:
+          type: string
+        businessOwnerId:
+          type: string
+        title:
+          type: string
+        description:
+          type: string
+        amountRequested:
+          type: number
+        status:
+          type: string
+        offers:
+          type: array
+          items:
+            type: string
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
+    FundingOffer:
+      type: object
+      properties:
+        id:
+          type: string
+        fundingEntityId:
+          type: string
+        fundingRequestId:
+          type: string
+        businessId:
+          type: string
+        amountOffered:
+          type: number
+        terms:
+          type: string
+        status:
+          type: string
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
+    OfferResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [accepted, rejected]
+    Business:
+      type: object
+      properties:
+        id:
+          type: string
+        ownerId:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        industry:
+          type: string
+        location:
+          type: string
+        fundingRequests:
+          type: array
+          items:
+            type: string
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
+    CommunityPost:
+      type: object
+      properties:
+        id:
+          type: string
+        userId:
+          type: string
+        content:
+          type: string
+        media:
+          type: array
+          items:
+            type: string
+        reactions:
+          type: array
+          items:
+            type: string
+        comments:
+          type: array
+          items:
+            type: string
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
+    CommunityComment:
+      type: object
+      properties:
+        id:
+          type: string
+        postId:
+          type: string
+        userId:
+          type: string
+        content:
+          type: string
+        createdAt:
+          type: string
+    CommunityReaction:
+      type: object
+      properties:
+        id:
+          type: string
+        postId:
+          type: string
+        userId:
+          type: string
+        type:
+          type: string
+        createdAt:
+          type: string
+    JobPosting:
+      type: object
+      properties:
+        id:
+          type: string
+        userId:
+          type: string
+        title:
+          type: string
+        description:
+          type: string
+        requirements:
+          type: array
+          items:
+            type: string
+        applicants:
+          type: array
+          items:
+            type: string
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
+    Chat:
+      type: object
+      properties:
+        id:
+          type: string
+        participants:
+          type: array
+          items:
+            type: string
+        type:
+          type: string
+          enum: [direct, group]
+        name:
+          type: string
+        description:
+          type: string
+        createdBy:
+          type: string
+        admins:
+          type: array
+          items:
+            type: string
+        lastMessage:
+          $ref: '#/components/schemas/Message'
+        unreadCounts:
+          type: object
+          additionalProperties:
+            type: integer
+        pinned:
+          type: boolean
+        muted:
+          type: object
+          additionalProperties:
+            type: boolean
+        archived:
+          type: object
+          additionalProperties:
+            type: boolean
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
+    Message:
+      type: object
+      properties:
+        id:
+          type: string
+        conversationId:
+          type: string
+        senderId:
+          type: string
+        content:
+          type: string
+        type:
+          type: string
+          enum: [text, image, file]
+        fileUrl:
+          type: string
+        fileName:
+          type: string
+        fileType:
+          type: string
+        fileSize:
+          type: integer
+        edited:
+          type: boolean
+        editedAt:
+          type: string
+        deleted:
+          type: boolean
+        deletedAt:
+          type: string
+        reactions:
+          type: object
+          additionalProperties:
+            type: string
+        readBy:
+          type: array
+          items:
+            type: string
+        createdAt:
+          type: string
+    CreateChatRequest:
+      type: object
+      required:
+        - participants
+      properties:
+        participants:
+          type: array
+          items:
+            type: string
+        type:
+          type: string
+          enum: [direct, group]
+        name:
+          type: string
+        description:
+          type: string
+    SendMessageRequest:
+      type: object
+      required:
+        - content
+      properties:
+        content:
+          type: string
+        type:
+          type: string
+          enum: [text, image, file]
+        fileUrl:
+          type: string
+        fileName:
+          type: string
+        fileType:
+          type: string
+        fileSize:
+          type: integer
+    EditMessageRequest:
+      type: object
+      required:
+        - content
+      properties:
+        content:
+          type: string
+    ReactionRequest:
+      type: object
+      required:
+        - reaction
+      properties:
+        reaction:
+          type: string
+    ChatSettingsRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        pinned:
+          type: boolean
+        muted:
+          type: boolean
+        archived:
+          type: boolean
+paths:
+  /api/auth/register:
+    post:
+      summary: Register a new user
+      tags: [Auth]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+      responses:
+        '201':
+          description: User registered successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  token:
+                    type: string
+                  user:
+                    $ref: '#/components/schemas/User'
+        '400':
+          description: Invalid input data
+  /api/auth/login:
+    post:
+      summary: Login user
+      tags: [Auth]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  token:
+                    type: string
+                  user:
+                    $ref: '#/components/schemas/User'
+        '401':
+          description: Invalid credentials
+  /api/auth/profile:
+    get:
+      summary: Get user profile
+      tags: [Auth]
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: User profile retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  user:
+                    $ref: '#/components/schemas/User'
+        '401':
+          description: Unauthorized
+    patch:
+      summary: Update user profile
+      tags: [Auth]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateProfileRequest'
+      responses:
+        '200':
+          description: Profile updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  user:
+                    $ref: '#/components/schemas/User'
+        '401':
+          description: Unauthorized
+  /api/auth/users:
+    get:
+      summary: Get all users (admin only)
+      tags: [Admin]
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: List of users retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/User'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden - Admin access required
+  /api/auth/users/{userId}/status:
+    patch:
+      summary: Update user status (admin only)
+      tags: [Admin]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: userId
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateStatusRequest'
+      responses:
+        '200':
+          description: User status updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  user:
+                    $ref: '#/components/schemas/User'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden - Admin access required
+  /api/auth/logout:
+    post:
+      summary: Logout user
+      tags: [Auth]
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Logout successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        '401':
+          description: Unauthorized or already logged out
+  /api/auth/update-profile:
+    put:
+      summary: Update user profile (full update)
+      tags: [Auth]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateProfileRequest'
+      responses:
+        '200':
+          description: Profile updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  user:
+                    $ref: '#/components/schemas/User'
+        '401':
+          description: Unauthorized
+  /api/admin/approve-user/{userId}:
+    post:
+      summary: Approve user registration (admin only)
+      tags: [Admin]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: userId
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: User approved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  user:
+                    $ref: '#/components/schemas/User'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden - Admin access required
+  /api/business/request-funding:
+    post:
+      summary: Create a funding request
+      tags: [Business]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FundingRequest'
+      responses:
+        '201':
+          description: Funding request created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  id:
+                    type: string
+        '400':
+          description: Invalid input data
+  /api/business/dashboard:
+    get:
+      summary: Get business dashboard analytics
+      tags: [Business]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: businessId
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Business dashboard analytics
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  totalRequested:
+                    type: number
+                  totalOffers:
+                    type: number
+                  acceptedOffers:
+                    type: number
+                  totalFunded:
+                    type: number
+                  requests:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/FundingRequest'
+                  offers:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/FundingOffer'
+  /api/business/funding-offers:
+    get:
+      summary: Get all funding offers for a business
+      tags: [Business]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: businessId
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: List of funding offers
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/FundingOffer'
+  /api/business/all:
+    get:
+      summary: Get all businesses
+      tags: [Business]
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: List of businesses
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Business'
+  /api/business/funding-offers/{offerId}/respond:
+    post:
+      summary: Accept or reject a funding offer
+      tags: [Business]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: offerId
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OfferResponse'
+      responses:
+        '200':
+          description: Offer response updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+  /api/funding-entities/dashboard:
+    get:
+      summary: Get funding entity dashboard analytics
+      tags: [FundingEntity]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: fundingEntityId
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Funding entity dashboard analytics
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  totalOffers:
+                    type: number
+                  acceptedOffers:
+                    type: number
+                  rejectedOffers:
+                    type: number
+                  totalInvested:
+                    type: number
+                  offers:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/FundingOffer'
+  /api/businesses/investment-requests:
+    get:
+      summary: Get all businesses seeking investment
+      tags: [FundingEntity]
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: List of funding requests
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/FundingRequest'
+  /api/funding-entities/offer:
+    post:
+      summary: Submit a funding offer
+      tags: [FundingEntity]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FundingOffer'
+      responses:
+        '201':
+          description: Funding offer submitted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  id:
+                    type: string
+        '400':
+          description: Invalid input data
+  /api/funding-entities/all:
+    get:
+      summary: Get all funding entities
+      tags: [FundingEntity]
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: List of funding entities
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/User'
+  /api/admin/pending-approvals:
+    get:
+      summary: Get all users pending approval
+      tags: [Admin]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            default: 10
+            maximum: 50
+        - in: query
+          name: page
+          schema:
+            type: integer
+            default: 1
+      responses:
+        '200':
+          description: List of pending users
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/User'
+              examples:
+                example:
+                  value:
+                    - id: "user123"
+                      email: "pendinguser@example.com"
+                      firstName: "Pending"
+                      lastName: "User"
+                      status: "pending"
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+  /api/admin/approve-user/{id}:
+    post:
+      summary: Approve or reject a user
+      tags: [Admin]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                status:
+                  type: string
+                  enum: [approved, rejected]
+            example:
+              status: "approved"
+      responses:
+        '200':
+          description: User status updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+              example:
+                message: "User approved"
+        '400':
+          description: Invalid status
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+  /api/admin/analytics:
+    get:
+      summary: Get platform analytics
+      tags: [Admin]
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Platform analytics
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  totalUsers:
+                    type: integer
+                  totalBusinesses:
+                    type: integer
+                  totalFundingRequests:
+                    type: integer
+                  totalFundingOffers:
+                    type: integer
+                  totalCommunityPosts:
+                    type: integer
+                  totalCommunityComments:
+                    type: integer
+                  totalJobPostings:
+                    type: integer
+              example:
+                totalUsers: 100
+                totalBusinesses: 20
+                totalFundingRequests: 15
+                totalFundingOffers: 30
+                totalCommunityPosts: 50
+                totalCommunityComments: 120
+                totalJobPostings: 5
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+  /api/community/post:
+    post:
+      summary: Create a community post
+      tags: [Community]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CommunityPost'
+            example:
+              content: "Excited to launch our new product!"
+              media: ["https://example.com/image.jpg"]
+      responses:
+        '201':
+          description: Post created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  id:
+                    type: string
+              example:
+                message: "Post created"
+                id: "post123"
+        '400':
+          description: Invalid input data
+  /api/community/posts:
+    get:
+      summary: Fetch community posts
+      tags: [Community]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            default: 10
+            maximum: 50
+        - in: query
+          name: page
+          schema:
+            type: integer
+            default: 1
+      responses:
+        '200':
+          description: List of posts
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CommunityPost'
+              examples:
+                example:
+                  value:
+                    - id: "post123"
+                      userId: "user123"
+                      content: "Excited to launch our new product!"
+                      media: ["https://example.com/image.jpg"]
+                      createdAt: "2024-06-01T12:00:00Z"
+                      updatedAt: "2024-06-01T12:00:00Z"
+        '401':
+          description: Unauthorized
+  /api/community/react:
+    post:
+      summary: React to a post
+      tags: [Community]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CommunityReaction'
+            example:
+              postId: "post123"
+              type: "like"
+      responses:
+        '201':
+          description: Reaction added
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  id:
+                    type: string
+              example:
+                message: "Reaction added"
+                id: "reaction123"
+        '400':
+          description: Invalid input data
+  /api/community/comment:
+    post:
+      summary: Add a comment to a post
+      tags: [Community]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CommunityComment'
+            example:
+              postId: "post123"
+              content: "Great job!"
+      responses:
+        '201':
+          description: Comment added
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  id:
+                    type: string
+              example:
+                message: "Comment added"
+                id: "comment123"
+        '400':
+          description: Invalid input data
+  /api/community/job:
+    post:
+      summary: Post a job offer
+      tags: [Community]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/JobPosting'
+            example:
+              title: "Frontend Developer"
+              description: "Looking for a React.js developer."
+              requirements: ["React.js", "CSS", "REST APIs"]
+      responses:
+        '201':
+          description: Job posted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  id:
+                    type: string
+              example:
+                message: "Job posted"
+                id: "job123"
+        '400':
+          description: Invalid input data
+  /api/chats:
+    post:
+      summary: Create a new chat (direct or group)
+      tags: [Chat]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateChatRequest'
+      responses:
+        '201':
+          description: Chat created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Chat'
+        '400':
+          description: Invalid input data
+    get:
+      summary: Get user's chats
+      tags: [Chat]
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: List of user's chats
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Chat'
+        '401':
+          description: Unauthorized
+
+  /api/chats/{chatId}/messages:
+    get:
+      summary: Get chat messages
+      tags: [Chat]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: chatId
+          required: true
+          schema:
+            type: string
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            default: 50
+        - in: query
+          name: before
+          schema:
+            type: string
+            description: Message ID to paginate before
+      responses:
+        '200':
+          description: List of messages
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Message'
+        '401':
+          description: Unauthorized
+    post:
+      summary: Send a message
+      tags: [Chat]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: chatId
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SendMessageRequest'
+      responses:
+        '201':
+          description: Message sent
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+        '400':
+          description: Invalid input data
+
+  /api/chats/{chatId}/read:
+    post:
+      summary: Mark all messages as read
+      tags: [Chat]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: chatId
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Messages marked as read
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        '401':
+          description: Unauthorized
+
+  /api/chats/messages/{messageId}:
+    put:
+      summary: Edit a message
+      tags: [Chat]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: messageId
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EditMessageRequest'
+      responses:
+        '200':
+          description: Message edited
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+        '400':
+          description: Invalid input data
+    delete:
+      summary: Delete a message
+      tags: [Chat]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: messageId
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Message deleted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+        '401':
+          description: Unauthorized
+
+  /api/chats/messages/{messageId}/reactions:
+    post:
+      summary: Add reaction to a message
+      tags: [Chat]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: messageId
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReactionRequest'
+      responses:
+        '200':
+          description: Reaction added
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+        '400':
+          description: Invalid input data
+    delete:
+      summary: Remove reaction from a message
+      tags: [Chat]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: messageId
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Reaction removed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+        '401':
+          description: Unauthorized
+
+  /api/chats/{chatId}/settings:
+    patch:
+      summary: Update chat settings
+      tags: [Chat]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: chatId
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChatSettingsRequest'
+      responses:
+        '200':
+          description: Chat updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Chat'
+        '400':
+          description: Invalid input data
+
+  /api/chats/{chatId}:
+    delete:
+      summary: Delete a chat
+      tags: [Chat]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: chatId
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Chat deleted
+        '401':
+          description: Unauthorized 
