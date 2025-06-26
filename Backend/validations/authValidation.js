@@ -7,31 +7,103 @@ const registerSchema = Joi.object({
   lastName: Joi.string().required(),
   phone: Joi.string().pattern(/^\+?[1-9]\d{1,14}$/).required(),
   role: Joi.string().valid('user', 'businessOwner', 'fundingEntity', 'admin').required(),
-  businessDetails: Joi.when('role', {
+  
+  // Business Owner specific fields
+  businessName: Joi.when('role', {
     is: 'businessOwner',
-    then: Joi.object({
-      businessName: Joi.string().required(),
-      businessOwnerName: Joi.string().required(),
-      idNumber: Joi.string().required(),
-      teamSize: Joi.number().integer().min(1).required(),
-      taxRegister: Joi.string().required(),
-      businessEmail: Joi.string().email().required(),
-      businessPhone: Joi.string().pattern(/^\+?[1-9]\d{1,14}$/).required(),
-      businessLocation: Joi.string().required(),
-      businessIndustry: Joi.string().required()
-    }).required(),
+    then: Joi.string().required(),
     otherwise: Joi.forbidden()
   }),
-  fundingDetails: Joi.when('role', {
+  businessOwnerName: Joi.when('role', {
+    is: 'businessOwner',
+    then: Joi.string().required(),
+    otherwise: Joi.forbidden()
+  }),
+  idNumber: Joi.when('role', {
+    is: 'businessOwner',
+    then: Joi.string().required(),
+    otherwise: Joi.forbidden()
+  }),
+  idPhoto: Joi.when('role', {
+    is: 'businessOwner',
+    then: Joi.string().optional(),
+    otherwise: Joi.forbidden()
+  }),
+  teamSize: Joi.when('role', {
+    is: 'businessOwner',
+    then: Joi.number().integer().min(1).required(),
+    otherwise: Joi.forbidden()
+  }),
+  taxRegister: Joi.when('role', {
+    is: 'businessOwner',
+    then: Joi.string().required(),
+    otherwise: Joi.forbidden()
+  }),
+  businessEmail: Joi.when('role', {
+    is: 'businessOwner',
+    then: Joi.string().email().required(),
+    otherwise: Joi.forbidden()
+  }),
+  businessPhone: Joi.when('role', {
+    is: 'businessOwner',
+    then: Joi.string().pattern(/^\+?[1-9]\d{1,14}$/).required(),
+    otherwise: Joi.forbidden()
+  }),
+  businessLocation: Joi.when('role', {
+    is: 'businessOwner',
+    then: Joi.string().required(),
+    otherwise: Joi.forbidden()
+  }),
+  businessIndustry: Joi.when('role', {
+    is: 'businessOwner',
+    then: Joi.string().required(),
+    otherwise: Joi.forbidden()
+  }),
+  fundingRounds: Joi.when('role', {
+    is: 'businessOwner',
+    then: Joi.number().integer().min(0).default(0),
+    otherwise: Joi.forbidden()
+  }),
+  fundingTotal: Joi.when('role', {
+    is: 'businessOwner',
+    then: Joi.string().default('0'),
+    otherwise: Joi.forbidden()
+  }),
+  
+  // Funding Entity specific fields
+  fundingEntityName: Joi.when('role', {
     is: 'fundingEntity',
-    then: Joi.object({
-      fundingEntityName: Joi.string().required(),
-      fundingEntityResponsibleName: Joi.string().required(),
-      fundingEntityPhone: Joi.string().pattern(/^\+?[1-9]\d{1,14}$/).required(),
-      fundingEntityEmail: Joi.string().email().required(),
-      fundingTaxRegister: Joi.string().required(),
-      fundingLocation: Joi.string().required()
-    }).required(),
+    then: Joi.string().required(),
+    otherwise: Joi.forbidden()
+  }),
+  fundingEntityResponsibleName: Joi.when('role', {
+    is: 'fundingEntity',
+    then: Joi.string().required(),
+    otherwise: Joi.forbidden()
+  }),
+  fundingEntityPhone: Joi.when('role', {
+    is: 'fundingEntity',
+    then: Joi.string().pattern(/^\+?[1-9]\d{1,14}$/).required(),
+    otherwise: Joi.forbidden()
+  }),
+  fundingEntityEmail: Joi.when('role', {
+    is: 'fundingEntity',
+    then: Joi.string().email().required(),
+    otherwise: Joi.forbidden()
+  }),
+  fundingTaxRegister: Joi.when('role', {
+    is: 'fundingEntity',
+    then: Joi.string().required(),
+    otherwise: Joi.forbidden()
+  }),
+  fundingLocation: Joi.when('role', {
+    is: 'fundingEntity',
+    then: Joi.string().required(),
+    otherwise: Joi.forbidden()
+  }),
+  fundingPreferences: Joi.when('role', {
+    is: 'fundingEntity',
+    then: Joi.string().optional(),
     otherwise: Joi.forbidden()
   })
 });
@@ -51,9 +123,38 @@ const updateStatusSchema = Joi.object({
   status: Joi.string().valid('pending', 'approved', 'rejected').required()
 });
 
+// Business Owner update schema
+const updateBusinessOwnerSchema = Joi.object({
+  businessName: Joi.string(),
+  businessOwnerName: Joi.string(),
+  idNumber: Joi.string(),
+  idPhoto: Joi.string(),
+  teamSize: Joi.number().integer().min(1),
+  taxRegister: Joi.string(),
+  businessEmail: Joi.string().email(),
+  businessPhone: Joi.string().pattern(/^\+?[1-9]\d{1,14}$/),
+  businessLocation: Joi.string(),
+  businessIndustry: Joi.string(),
+  fundingRounds: Joi.number().integer().min(0),
+  fundingTotal: Joi.string()
+});
+
+// Funding Entity update schema
+const updateFundingEntitySchema = Joi.object({
+  fundingEntityName: Joi.string(),
+  fundingEntityResponsibleName: Joi.string(),
+  fundingEntityPhone: Joi.string().pattern(/^\+?[1-9]\d{1,14}$/),
+  fundingEntityEmail: Joi.string().email(),
+  fundingTaxRegister: Joi.string(),
+  fundingLocation: Joi.string(),
+  fundingPreferences: Joi.string()
+});
+
 module.exports = {
   registerSchema,
   loginSchema,
   updateProfileSchema,
-  updateStatusSchema
+  updateStatusSchema,
+  updateBusinessOwnerSchema,
+  updateFundingEntitySchema
 }; 

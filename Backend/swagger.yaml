@@ -466,24 +466,125 @@ components:
       properties:
         uid:
           type: string
+          description: Unique user identifier
+          example: "user123"
         email:
           type: string
+          format: email
+          description: User's email address
+          example: "john.doe@example.com"
         firstName:
           type: string
+          description: User's first name
+          example: "John"
         lastName:
           type: string
+          description: User's last name
+          example: "Doe"
         phone:
           type: string
+          description: User's phone number
+          example: "+1234567890"
         role:
           type: string
+          enum: [user, businessOwner, fundingEntity, admin]
+          description: User's role in the system
+          example: "businessOwner"
         status:
           type: string
-        businessDetails:
-          type: object
-        fundingDetails:
-          type: object
+          enum: [pending, approved, rejected]
+          description: User's account status
+          example: "approved"
         createdAt:
           type: string
+          format: date-time
+          description: Account creation timestamp
+          example: "2024-01-15T10:30:00.000Z"
+        
+        # Business Owner specific fields
+        businessName:
+          type: string
+          description: Business name (businessOwner role only)
+          example: "TechStart Inc."
+        businessOwnerName:
+          type: string
+          description: Business owner's full name (businessOwner role only)
+          example: "John Doe"
+        idNumber:
+          type: string
+          description: Business ID number (businessOwner role only)
+          example: "BUS123456"
+        idPhoto:
+          type: string
+          description: ID photo URL (businessOwner role only)
+          example: "https://example.com/id-photo.jpg"
+        teamSize:
+          type: integer
+          minimum: 1
+          description: Number of team members (businessOwner role only)
+          example: 10
+        taxRegister:
+          type: string
+          description: Tax registration number (businessOwner role only)
+          example: "TAX789012"
+        businessEmail:
+          type: string
+          format: email
+          description: Business email address (businessOwner role only)
+          example: "contact@techstart.com"
+        businessPhone:
+          type: string
+          description: Business phone number (businessOwner role only)
+          example: "+1234567890"
+        businessLocation:
+          type: string
+          description: Business location (businessOwner role only)
+          example: "San Francisco, CA"
+        businessIndustry:
+          type: string
+          description: Business industry (businessOwner role only)
+          example: "Technology"
+        fundingRounds:
+          type: integer
+          minimum: 0
+          description: Number of funding rounds completed (businessOwner role only)
+          example: 2
+        fundingTotal:
+          type: string
+          description: Total funding received (businessOwner role only)
+          example: "1.5M"
+        
+        # Funding Entity specific fields
+        fundingEntityName:
+          type: string
+          description: Funding entity name (fundingEntity role only)
+          example: "Venture Capital Fund"
+        fundingEntityResponsibleName:
+          type: string
+          description: Responsible person's name (fundingEntity role only)
+          example: "Jane Smith"
+        fundingEntityPhone:
+          type: string
+          description: Funding entity phone number (fundingEntity role only)
+          example: "+1234567890"
+        fundingEntityEmail:
+          type: string
+          format: email
+          description: Funding entity email (fundingEntity role only)
+          example: "contact@vcfund.com"
+        fundingTaxRegister:
+          type: string
+          description: Funding entity tax registration (fundingEntity role only)
+          example: "FUND456789"
+        fundingLocation:
+          type: string
+          description: Funding entity location (fundingEntity role only)
+          example: "New York, NY"
+        fundingPreferences:
+          type: string
+          description: Funding preferences and criteria (fundingEntity role only)
+          example: "Early-stage tech startups, Series A and B"
+
     RegisterRequest:
       type: object
       required:
@@ -497,22 +598,120 @@ components:
         email:
           type: string
           format: email
+          description: User's email address
+          example: "john.doe@example.com"
         password:
           type: string
           minLength: 8
+          description: User's password (minimum 8 characters)
+          example: "securePassword123"
         firstName:
           type: string
+          description: User's first name
+          example: "John"
         lastName:
           type: string
+          description: User's last name
+          example: "Doe"
         phone:
           type: string
+          pattern: "^\\+?[1-9]\\d{1,14}$"
+          description: User's phone number
+          example: "+1234567890"
         role:
           type: string
           enum: [user, businessOwner, fundingEntity, admin]
-        businessDetails:
-          type: object
-        fundingDetails:
-          type: object
+          description: User's role in the system
+          example: "businessOwner"
+        
+        # Business Owner specific fields
+        businessName:
+          type: string
+          description: Business name (required for businessOwner role)
+          example: "TechStart Inc."
+        businessOwnerName:
+          type: string
+          description: Business owner's full name (required for businessOwner role)
+          example: "John Doe"
+        idNumber:
+          type: string
+          description: Business ID number (required for businessOwner role)
+          example: "BUS123456"
+        idPhoto:
+          type: string
+          description: ID photo URL (optional for businessOwner role)
+          example: "https://example.com/id-photo.jpg"
+        teamSize:
+          type: integer
+          minimum: 1
+          description: Number of team members (required for businessOwner role)
+          example: 10
+        taxRegister:
+          type: string
+          description: Tax registration number (required for businessOwner role)
+          example: "TAX789012"
+        businessEmail:
+          type: string
+          format: email
+          description: Business email address (required for businessOwner role)
+          example: "contact@techstart.com"
+        businessPhone:
+          type: string
+          pattern: "^\\+?[1-9]\\d{1,14}$"
+          description: Business phone number (required for businessOwner role)
+          example: "+1234567890"
+        businessLocation:
+          type: string
+          description: Business location (required for businessOwner role)
+          example: "San Francisco, CA"
+        businessIndustry:
+          type: string
+          description: Business industry (required for businessOwner role)
+          example: "Technology"
+        fundingRounds:
+          type: integer
+          minimum: 0
+          default: 0
+          description: Number of funding rounds completed (optional for businessOwner role)
+          example: 2
+        fundingTotal:
+          type: string
+          default: "0"
+          description: Total funding received (optional for businessOwner role)
+          example: "1.5M"
+        
+        # Funding Entity specific fields
+        fundingEntityName:
+          type: string
+          description: Funding entity name (required for fundingEntity role)
+          example: "Venture Capital Fund"
+        fundingEntityResponsibleName:
+          type: string
+          description: Responsible person's name (required for fundingEntity role)
+          example: "Jane Smith"
+        fundingEntityPhone:
+          type: string
+          pattern: "^\\+?[1-9]\\d{1,14}$"
+          description: Funding entity phone number (required for fundingEntity role)
+          example: "+1234567890"
+        fundingEntityEmail:
+          type: string
+          format: email
+          description: Funding entity email (required for fundingEntity role)
+          example: "contact@vcfund.com"
+        fundingTaxRegister:
+          type: string
+          description: Funding entity tax registration (required for fundingEntity role)
+          example: "FUND456789"
+        fundingLocation:
+          type: string
+          description: Funding entity location (required for fundingEntity role)
+          example: "New York, NY"
+        fundingPreferences:
+          type: string
+          description: Funding preferences and criteria (optional for fundingEntity role)
+          example: "Early-stage tech startups, Series A and B"
+
     LoginRequest:
       type: object
       required:

@@ -1,5 +1,5 @@
 const { db, auth } = require('../config/firebase');
-const { registerSchema, loginSchema, updateProfileSchema, updateStatusSchema } = require('../validations/authValidation');
+const { registerSchema, loginSchema, updateProfileSchema, updateStatusSchema, updateBusinessOwnerSchema, updateFundingEntitySchema } = require('../validations/authValidation');
 const BaseUser = require('../models/BaseUser');
 const BusinessOwner = require('../models/BusinessOwner');
 const FundingEntity = require('../models/FundingEntity');
@@ -14,7 +14,35 @@ const register = async (req, res) => {
       return res.status(400).json({ error: error.details[0].message });
     }
 
-    const { email, password, firstName, lastName, phone, role, businessDetails, fundingDetails } = req.body;
+    const { 
+      email, 
+      password, 
+      firstName, 
+      lastName, 
+      phone, 
+      role,
+      // Business Owner fields
+      businessName,
+      businessOwnerName,
+      idNumber,
+      idPhoto,
+      teamSize,
+      taxRegister,
+      businessEmail,
+      businessPhone,
+      businessLocation,
+      businessIndustry,
+      fundingRounds,
+      fundingTotal,
+      // Funding Entity fields
+      fundingEntityName,
+      fundingEntityResponsibleName,
+      fundingEntityPhone,
+      fundingEntityEmail,
+      fundingTaxRegister,
+      fundingLocation,
+      fundingPreferences
+    } = req.body;
 
     // Create user in Firebase Auth
     const userRecord = await auth.createUser({
@@ -39,12 +67,30 @@ const register = async (req, res) => {
       createdAt: new Date().toISOString()
     };
 
-    if (role === 'businessOwner' && businessDetails) {
-      userData.businessDetails = businessDetails;
+    // Add role-specific fields
+    if (role === 'businessOwner') {
+      userData.businessName = businessName;
+      userData.businessOwnerName = businessOwnerName;
+      userData.idNumber = idNumber;
+      userData.idPhoto = idPhoto;
+      userData.teamSize = teamSize;
+      userData.taxRegister = taxRegister;
+      userData.businessEmail = businessEmail;
+      userData.businessPhone = businessPhone;
+      userData.businessLocation = businessLocation;
+      userData.businessIndustry = businessIndustry;
+      userData.fundingRounds = fundingRounds || 0;
+      userData.fundingTotal = fundingTotal || '0';
     }
 
-    if (role === 'fundingEntity' && fundingDetails) {
-      userData.fundingDetails = fundingDetails;
+    if (role === 'fundingEntity') {
+      userData.fundingEntityName = fundingEntityName;
+      userData.fundingEntityResponsibleName = fundingEntityResponsibleName;
+      userData.fundingEntityPhone = fundingEntityPhone;
+      userData.fundingEntityEmail = fundingEntityEmail;
+      userData.fundingTaxRegister = fundingTaxRegister;
+      userData.fundingLocation = fundingLocation;
+      userData.fundingPreferences = fundingPreferences;
     }
 
     const userRef = db.collection('users').doc(userRecord.uid);
@@ -135,7 +181,9 @@ const getProfile = async (req, res) => {
     }
 
     const userData = userDoc.data();
-    res.json({
+    
+    // Build response based on user role
+    const response = {
       user: {
         uid: userData.uid,
         email: userData.email,
@@ -144,11 +192,37 @@ const getProfile = async (req, res) => {
         phone: userData.phone,
         role: userData.role,
         status: userData.status,
-        businessDetails: userData.businessDetails,
-        fundingDetails: userData.fundingDetails,
         createdAt: userData.createdAt
       }
-    });
+    };
+
+    // Add role-specific fields
+    if (userData.role === 'businessOwner') {
+      response.user.businessName = userData.businessName;
+      response.user.businessOwnerName = userData.businessOwnerName;
+      response.user.idNumber = userData.idNumber;
+      response.user.idPhoto = userData.idPhoto;
+      response.user.teamSize = userData.teamSize;
+      response.user.taxRegister = userData.taxRegister;
+      response.user.businessEmail = userData.businessEmail;
+      response.user.businessPhone = userData.businessPhone;
+      response.user.businessLocation = userData.businessLocation;
+      response.user.businessIndustry = userData.businessIndustry;
+      response.user.fundingRounds = userData.fundingRounds;
+      response.user.fundingTotal = userData.fundingTotal;
+    }
+
+    if (userData.role === 'fundingEntity') {
+      response.user.fundingEntityName = userData.fundingEntityName;
+      response.user.fundingEntityResponsibleName = userData.fundingEntityResponsibleName;
+      response.user.fundingEntityPhone = userData.fundingEntityPhone;
+      response.user.fundingEntityEmail = userData.fundingEntityEmail;
+      response.user.fundingTaxRegister = userData.fundingTaxRegister;
+      response.user.fundingLocation = userData.fundingLocation;
+      response.user.fundingPreferences = userData.fundingPreferences;
+    }
+
+    res.json(response);
   } catch (error) {
     console.error('Get profile error:', error);
     res.status(500).json({ error: 'Error fetching profile' });
@@ -183,6 +257,113 @@ const updateProfile = async (req, res) => {
   } catch (error) {
     console.error('Update profile error:', error);
     res.status(500).json({ error: 'Error updating profile' });
+  }
+};
+
+// Update business owner details
+const updateBusinessOwnerDetails = async (req, res) => {
+  try {
+    const { error } = updateBusinessOwnerSchema.validate(req.body);
+    if (error) {
+      return res.status(400).json({ error: error.details[0].message });
+    }
+
+    // Check if user is a business owner
+    if (req.user.role !== 'businessOwner') {
+      return res.status(403).json({ error: 'Only business owners can update business details' });
+    }
+
+    const updateData = {};
+    const allowedFields = [
+      'businessName',
+      'businessOwnerName',
+      'idNumber',
+      'idPhoto',
+      'teamSize',
+      'taxRegister',
+      'businessEmail',
+      'businessPhone',
+      'businessLocation',
+      'businessIndustry',
+      'fundingRounds',
+      'fundingTotal'
+    ];
+
+    // Only update provided fields
+    allowedFields.forEach(field => {
+      if (req.body[field] !== undefined) {
+        updateData[field] = req.body[field];
+      }
+    });
+
+    if (Object.keys(updateData).length === 0) {
+      return res.status(400).json({ error: 'No valid fields to update' });
+    }
+
+    const userRef = db.collection('users').doc(req.user.uid);
+    await userRef.update(updateData);
+
+    res.json({
+      message: 'Business details updated successfully',
+      user: {
+        uid: req.user.uid,
+        ...updateData
+      }
+    });
+  } catch (error) {
+    console.error('Update business owner details error:', error);
+    res.status(500).json({ error: 'Error updating business details' });
+  }
+};
+
+// Update funding entity details
+const updateFundingEntityDetails = async (req, res) => {
+  try {
+    const { error } = updateFundingEntitySchema.validate(req.body);
+    if (error) {
+      return res.status(400).json({ error: error.details[0].message });
+    }
+
+    // Check if user is a funding entity
+    if (req.user.role !== 'fundingEntity') {
+      return res.status(403).json({ error: 'Only funding entities can update funding details' });
+    }
+
+    const updateData = {};
+    const allowedFields = [
+      'fundingEntityName',
+      'fundingEntityResponsibleName',
+      'fundingEntityPhone',
+      'fundingEntityEmail',
+      'fundingTaxRegister',
+      'fundingLocation',
+      'fundingPreferences'
+    ];
+
+    // Only update provided fields
+    allowedFields.forEach(field => {
+      if (req.body[field] !== undefined) {
+        updateData[field] = req.body[field];
+      }
+    });
+
+    if (Object.keys(updateData).length === 0) {
+      return res.status(400).json({ error: 'No valid fields to update' });
+    }
+
+    const userRef = db.collection('users').doc(req.user.uid);
+    await userRef.update(updateData);
+
+    res.json({
+      message: 'Funding entity details updated successfully',
+      user: {
+        uid: req.user.uid,
+        ...updateData
+      }
+    });
+  } catch (error) {
+    console.error('Update funding entity details error:', error);
+    res.status(500).json({ error: 'Error updating funding entity details' });
   }
 };
 
@@ -270,6 +451,8 @@ module.exports = {
   login,
   getProfile,
   updateProfile,
+  updateBusinessOwnerDetails,
+  updateFundingEntityDetails,
   getAllUsers,
   updateUserStatus,
   logout,
