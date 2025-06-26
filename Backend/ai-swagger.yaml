@@ -1,0 +1,830 @@
+# AI Endpoints Documentation for StartFlow API
+
+paths:
+  /api/ai/status:
+    get:
+      tags:
+        - AI Status
+      summary: Get comprehensive AI service status
+      description: |
+        Returns the complete status of the AI integration, including:
+        - Backend service status
+        - AI service health
+        - Available AI features
+        - Service configuration
+      responses:
+        '200':
+          description: AI integration status retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AIStatusResponse'
+              example:
+                success: true
+                data:
+                  service: "StartFlow AI Integration"
+                  backend:
+                    status: "healthy"
+                    port: 3000
+                    environment: "development"
+                  ai_service:
+                    status: "healthy"
+                    url: "http://localhost:8000"
+                    health:
+                      status: "healthy"
+                      service: "StartFlow AI API"
+                      version: "1.0.0"
+                      modelsLoaded:
+                        recommendation: true
+                        startup_success: true
+                        profit_prediction: true
+                    info:
+                      message: "Welcome to StartFlow AI API"
+                      version: "1.0.0"
+                      endpoints:
+                        recommendations: "/ai/recommendations"
+                        startup_success: "/ai/predict-startup-success"
+                        profit_prediction: "/ai/predict-profit"
+                  features:
+                    recommendations: "Company recommendations based on industry"
+                    startup_success: "Startup success probability prediction"
+                    profit_prediction: "Profit prediction based on spending allocation"
+                  timestamp: "2024-01-15T10:30:00.000Z"
+        '503':
+          description: AI service unavailable
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                success: false
+                error: "AI service is not responding"
+                details: "Connection refused"
+
+  /api/ai/health:
+    get:
+      tags:
+        - AI Status
+      summary: Check AI service health
+      description: |
+        Checks the health status of the AI service and returns:
+        - Service status (healthy/unhealthy)
+        - Service information
+        - Model loading status
+        - Version information
+      responses:
+        '200':
+          description: AI service health status
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AIHealthStatus'
+              example:
+                success: true
+                status: "healthy"
+                data:
+                  service: "StartFlow AI API"
+                  version: "1.0.0"
+                  modelsLoaded:
+                    recommendation: true
+                    startup_success: true
+                    profit_prediction: true
+                  timestamp: "2024-01-15T10:30:00.000Z"
+        '503':
+          description: AI service unhealthy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                success: false
+                status: "unhealthy"
+                error: "AI service is not responding"
+                details: "Connection timeout"
+
+  /api/ai/info:
+    get:
+      tags:
+        - AI Status
+      summary: Get AI service information
+      description: |
+        Retrieves general information about the AI service including:
+        - Service description
+        - Available endpoints
+        - Version information
+        - Service capabilities
+      responses:
+        '200':
+          description: AI service information retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: object
+                    properties:
+                      message:
+                        type: string
+                        example: "Welcome to StartFlow AI API"
+                      version:
+                        type: string
+                        example: "1.0.0"
+                      endpoints:
+                        type: object
+                        properties:
+                          recommendations:
+                            type: string
+                            example: "/ai/recommendations"
+                          startup_success:
+                            type: string
+                            example: "/ai/predict-startup-success"
+                          profit_prediction:
+                            type: string
+                            example: "/ai/predict-profit"
+                          health:
+                            type: string
+                            example: "/health"
+                          docs:
+                            type: string
+                            example: "/docs"
+                      timestamp:
+                        type: string
+                        format: date-time
+                        example: "2024-01-15T10:30:00.000Z"
+        '503':
+          description: Unable to get AI service information
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/ai/recommendations:
+    post:
+      tags:
+        - AI Recommendations
+      summary: Get company recommendations based on industry
+      description: |
+        Uses AI-powered TF-IDF similarity to recommend companies based on industry input.
+        
+        **Features:**
+        - Industry-based matching using TF-IDF vectorization
+        - Cosine similarity scoring
+        - Returns companies with funding and market size information
+        - Configurable number of recommendations
+        
+        **Use Cases:**
+        - Finding similar companies in the same industry
+        - Market research and competitive analysis
+        - Investment opportunity discovery
+        - Partnership identification
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/IndustryInput'
+            example:
+              industry: "Fintech"
+              top_n: 6
+      responses:
+        '200':
+          description: Company recommendations retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RecommendationsResponse'
+              example:
+                success: true
+                message: "Found 6 recommendations for Fintech"
+                data:
+                  industry: "Fintech"
+                  recommendations:
+                    - Company Name: "Fawry"
+                      Industry: "Digital Payments"
+                      Funding Amount: "470 million"
+                      Market Size: "Large"
+                    - Company Name: "Paymob"
+                      Industry: "Fintech"
+                      Funding Amount: "846 million"
+                      Market Size: "Large"
+                    - Company Name: "Ebtikar"
+                      Industry: "Fintech"
+                      Funding Amount: "705 million"
+                      Market Size: "Large"
+                  count: 6
+                  timestamp: "2024-01-15T10:30:00.000Z"
+        '400':
+          description: Invalid input provided
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                success: false
+                error: "Industry is required and must be a string"
+        '503':
+          description: AI service unavailable
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                success: false
+                error: "AI service is currently unavailable"
+                details: "Connection refused"
+
+  /api/ai/predict-startup-success:
+    post:
+      tags:
+        - AI Predictions
+      summary: Predict startup success probability
+      description: |
+        Uses machine learning to predict startup success probability based on various factors.
+        
+        **Model Features:**
+        - Funding information and milestones
+        - Investor backing and funding rounds
+        - Geographic location indicators
+        - Company age and development stage
+        
+        **Prediction Output:**
+        - Success probability (0.0 to 1.0)
+        - Risk level assessment (Low/Medium/High)
+        - Confidence metrics
+        - Interpretable results
+        
+        **Use Cases:**
+        - Investment decision support
+        - Risk assessment for funding entities
+        - Startup evaluation and benchmarking
+        - Strategic planning for business owners
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StartupSuccessInput'
+            example:
+              funding_total_usd: 1000000
+              milestones: 5
+              has_VC: 1
+              has_angel: 1
+              has_roundA: 1
+              has_roundB: 0
+              has_roundC: 0
+              has_roundD: 0
+              avg_participants: 3.5
+              is_CA: 1
+              is_NY: 0
+              is_MA: 0
+              is_TX: 0
+              is_otherstate: 0
+              age_first_funding_years: 2.5
+      responses:
+        '200':
+          description: Startup success prediction completed successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StartupSuccessResponse'
+              example:
+                success: true
+                message: "Startup success prediction completed"
+                data:
+                  prediction:
+                    success_prediction: 1
+                    success_probability: 0.85
+                    failure_probability: 0.15
+                  interpretation:
+                    success_likely: true
+                    confidence: 0.85
+                    risk_level: "Low"
+                  timestamp: "2024-01-15T10:30:00.000Z"
+        '400':
+          description: Invalid input or missing required fields
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                success: false
+                error: "Missing required fields: milestones, has_VC, has_angel"
+        '503':
+          description: AI service unavailable
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                success: false
+                error: "AI service is currently unavailable"
+                details: "Model loading failed"
+
+  /api/ai/predict-profit:
+    post:
+      tags:
+        - AI Predictions
+      summary: Predict profit based on spending allocation
+      description: |
+        Uses linear regression to predict profit based on spending allocation across different categories.
+        
+        **Model Features:**
+        - Research & Development spending
+        - Administrative costs
+        - Marketing and advertising expenses
+        
+        **Prediction Output:**
+        - Predicted profit amount
+        - Confidence level
+        - Spending insights and recommendations
+        - Cost breakdown analysis
+        
+        **Use Cases:**
+        - Financial planning and budgeting
+        - Resource allocation optimization
+        - ROI analysis for different spending categories
+        - Business strategy development
+        - Performance benchmarking
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProfitPredictionInput'
+            example:
+              RnD_Spend: 500000
+              Administration: 200000
+              Marketing_Spend: 300000
+      responses:
+        '200':
+          description: Profit prediction completed successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProfitPredictionResponse'
+              example:
+                success: true
+                message: "Profit prediction completed"
+                data:
+                  prediction:
+                    predicted_profit: 750000
+                    confidence: 0.85
+                    currency: "USD"
+                  insights:
+                    total_spending: 1000000
+                    spending_breakdown:
+                      rnd_percentage: 50.0
+                      admin_percentage: 20.0
+                      marketing_percentage: 30.0
+                    recommendations:
+                      - "Consider increasing R&D spending for better innovation potential"
+                  timestamp: "2024-01-15T10:30:00.000Z"
+        '400':
+          description: Invalid input or missing required fields
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                success: false
+                error: "Missing required fields: RnD_Spend, Administration, Marketing_Spend"
+        '503':
+          description: AI service unavailable
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                success: false
+                error: "AI service is currently unavailable"
+                details: "Model prediction failed"
+
+# AI Schemas
+components:
+  schemas:
+    IndustryInput:
+      type: object
+      required:
+        - industry
+      properties:
+        industry:
+          type: string
+          description: Industry to get recommendations for
+          example: "Fintech"
+          minLength: 1
+          maxLength: 100
+        top_n:
+          type: integer
+          description: Number of recommendations to return
+          minimum: 1
+          maximum: 20
+          default: 6
+          example: 6
+    
+    StartupSuccessInput:
+      type: object
+      required:
+        - funding_total_usd
+        - milestones
+        - has_VC
+        - has_angel
+        - has_roundA
+        - has_roundB
+        - has_roundC
+        - has_roundD
+        - avg_participants
+        - is_CA
+        - is_NY
+        - is_MA
+        - is_TX
+        - is_otherstate
+        - age_first_funding_years
+      properties:
+        funding_total_usd:
+          type: number
+          description: Total funding in USD
+          minimum: 0
+          example: 1000000
+        milestones:
+          type: integer
+          description: Number of milestones achieved
+          minimum: 0
+          maximum: 100
+          example: 5
+        has_VC:
+          type: integer
+          enum: [0, 1]
+          description: Has venture capital backing (0 = No, 1 = Yes)
+          example: 1
+        has_angel:
+          type: integer
+          enum: [0, 1]
+          description: Has angel investor backing (0 = No, 1 = Yes)
+          example: 1
+        has_roundA:
+          type: integer
+          enum: [0, 1]
+          description: Has completed Series A (0 = No, 1 = Yes)
+          example: 1
+        has_roundB:
+          type: integer
+          enum: [0, 1]
+          description: Has completed Series B (0 = No, 1 = Yes)
+          example: 0
+        has_roundC:
+          type: integer
+          enum: [0, 1]
+          description: Has completed Series C (0 = No, 1 = Yes)
+          example: 0
+        has_roundD:
+          type: integer
+          enum: [0, 1]
+          description: Has completed Series D (0 = No, 1 = Yes)
+          example: 0
+        avg_participants:
+          type: number
+          description: Average number of participants in funding rounds
+          minimum: 0
+          maximum: 50
+          example: 3.5
+        is_CA:
+          type: integer
+          enum: [0, 1]
+          description: Is located in California (0 = No, 1 = Yes)
+          example: 1
+        is_NY:
+          type: integer
+          enum: [0, 1]
+          description: Is located in New York (0 = No, 1 = Yes)
+          example: 0
+        is_MA:
+          type: integer
+          enum: [0, 1]
+          description: Is located in Massachusetts (0 = No, 1 = Yes)
+          example: 0
+        is_TX:
+          type: integer
+          enum: [0, 1]
+          description: Is located in Texas (0 = No, 1 = Yes)
+          example: 0
+        is_otherstate:
+          type: integer
+          enum: [0, 1]
+          description: Is located in other states (0 = No, 1 = Yes)
+          example: 0
+        age_first_funding_years:
+          type: number
+          description: Age at first funding in years
+          minimum: 0
+          maximum: 50
+          example: 2.5
+    
+    ProfitPredictionInput:
+      type: object
+      required:
+        - RnD_Spend
+        - Administration
+        - Marketing_Spend
+      properties:
+        RnD_Spend:
+          type: number
+          description: Research and Development spending in USD
+          minimum: 0
+          example: 500000
+        Administration:
+          type: number
+          description: Administrative spending in USD
+          minimum: 0
+          example: 200000
+        Marketing_Spend:
+          type: number
+          description: Marketing spending in USD
+          minimum: 0
+          example: 300000
+    
+    CompanyRecommendation:
+      type: object
+      properties:
+        Company Name:
+          type: string
+          description: Name of the recommended company
+          example: "Fawry"
+        Industry:
+          type: string
+          description: Industry of the company
+          example: "Digital Payments"
+        Funding Amount:
+          type: string
+          description: Total funding amount
+          example: "470 million"
+        Market Size:
+          type: string
+          description: Market size category
+          enum: [Small, Medium, Large]
+          example: "Large"
+    
+    RecommendationsResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: "Found 6 recommendations for Fintech"
+        data:
+          type: object
+          properties:
+            industry:
+              type: string
+              example: "Fintech"
+            recommendations:
+              type: array
+              items:
+                $ref: '#/components/schemas/CompanyRecommendation'
+            count:
+              type: integer
+              example: 6
+            timestamp:
+              type: string
+              format: date-time
+              example: "2024-01-15T10:30:00.000Z"
+    
+    StartupSuccessPrediction:
+      type: object
+      properties:
+        success_prediction:
+          type: integer
+          enum: [0, 1]
+          description: "0 = Likely to fail, 1 = Likely to succeed"
+          example: 1
+        success_probability:
+          type: number
+          minimum: 0
+          maximum: 1
+          description: Probability of success (0.0 to 1.0)
+          example: 0.85
+        failure_probability:
+          type: number
+          minimum: 0
+          maximum: 1
+          description: Probability of failure (0.0 to 1.0)
+          example: 0.15
+    
+    StartupSuccessInterpretation:
+      type: object
+      properties:
+        success_likely:
+          type: boolean
+          description: Whether success is likely based on prediction
+          example: true
+        confidence:
+          type: number
+          minimum: 0
+          maximum: 1
+          description: Confidence level of the prediction
+          example: 0.85
+        risk_level:
+          type: string
+          enum: [Low, Medium, High]
+          description: Risk level assessment
+          example: "Low"
+    
+    StartupSuccessResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: "Startup success prediction completed"
+        data:
+          type: object
+          properties:
+            prediction:
+              $ref: '#/components/schemas/StartupSuccessPrediction'
+            interpretation:
+              $ref: '#/components/schemas/StartupSuccessInterpretation'
+            timestamp:
+              type: string
+              format: date-time
+              example: "2024-01-15T10:30:00.000Z"
+    
+    ProfitPrediction:
+      type: object
+      properties:
+        predicted_profit:
+          type: number
+          description: Predicted profit in USD
+          example: 750000
+        confidence:
+          type: number
+          minimum: 0
+          maximum: 1
+          description: Confidence level of the prediction
+          example: 0.85
+        currency:
+          type: string
+          description: Currency of the prediction
+          example: "USD"
+    
+    SpendingInsights:
+      type: object
+      properties:
+        total_spending:
+          type: number
+          description: Total spending amount
+          example: 1000000
+        spending_breakdown:
+          type: object
+          properties:
+            rnd_percentage:
+              type: number
+              description: Percentage spent on R&D
+              example: 50.0
+            admin_percentage:
+              type: number
+              description: Percentage spent on administration
+              example: 20.0
+            marketing_percentage:
+              type: number
+              description: Percentage spent on marketing
+              example: 30.0
+        recommendations:
+          type: array
+          items:
+            type: string
+          description: Spending optimization recommendations
+          example: ["Consider increasing R&D spending for better innovation potential"]
+    
+    ProfitPredictionResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: "Profit prediction completed"
+        data:
+          type: object
+          properties:
+            prediction:
+              $ref: '#/components/schemas/ProfitPrediction'
+            insights:
+              $ref: '#/components/schemas/SpendingInsights'
+            timestamp:
+              type: string
+              format: date-time
+              example: "2024-01-15T10:30:00.000Z"
+    
+    AIHealthStatus:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        status:
+          type: string
+          enum: [healthy, unhealthy]
+          example: "healthy"
+        data:
+          type: object
+          properties:
+            service:
+              type: string
+              example: "StartFlow AI API"
+            version:
+              type: string
+              example: "1.0.0"
+            modelsLoaded:
+              type: object
+              properties:
+                recommendation:
+                  type: boolean
+                  example: true
+                startup_success:
+                  type: boolean
+                  example: true
+                profit_prediction:
+                  type: boolean
+                  example: true
+            timestamp:
+              type: string
+              format: date-time
+              example: "2024-01-15T10:30:00.000Z"
+    
+    AIStatusResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: object
+          properties:
+            service:
+              type: string
+              example: "StartFlow AI Integration"
+            backend:
+              type: object
+              properties:
+                status:
+                  type: string
+                  example: "healthy"
+                port:
+                  type: integer
+                  example: 3000
+                environment:
+                  type: string
+                  example: "development"
+            ai_service:
+              type: object
+              properties:
+                status:
+                  type: string
+                  enum: [healthy, unhealthy]
+                  example: "healthy"
+                url:
+                  type: string
+                  example: "http://localhost:8000"
+                health:
+                  type: object
+                info:
+                  type: object
+            features:
+              type: object
+              properties:
+                recommendations:
+                  type: string
+                  example: "Company recommendations based on industry"
+                startup_success:
+                  type: string
+                  example: "Startup success probability prediction"
+                profit_prediction:
+                  type: string
+                  example: "Profit prediction based on spending allocation"
+            timestamp:
+              type: string
+              format: date-time
+              example: "2024-01-15T10:30:00.000Z"
+    
+    ErrorResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        error:
+          type: string
+          description: Error message
+          example: "Invalid input provided"
+        details:
+          type: string
+          description: Additional error details (optional)
+          example: "Connection refused" 

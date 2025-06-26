@@ -12,6 +12,7 @@ const fundingRoutes = require('./routes/fundingRoutes');
 const adminRoutes = require('./routes/adminRoutes');
 const communityRoutes = require('./routes/communityRoutes');
 const chatRoutes = require('./routes/chatRoutes');
+const aiRoutes = require('./routes/aiRoutes');
 const rateLimit = require('express-rate-limit');
 const xss = require('xss-clean');
 const hpp = require('hpp');
@@ -85,6 +86,7 @@ app.use('/api', fundingRoutes);
 app.use('/api', adminRoutes);
 app.use('/api', communityRoutes);
 app.use('/api', chatRoutes);
+app.use('/api/ai', aiRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {
@@ -103,6 +105,7 @@ if (process.env.NODE_ENV !== 'test') {
   const PORT = process.env.PORT || 3000;
   server.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
+    console.log(`AI Service URL: ${process.env.AI_SERVICE_URL || 'http://localhost:8000'}`);
     if (process.env.NODE_ENV !== 'production') {
       open(`http://localhost:${PORT}/api/docs`);
     }
